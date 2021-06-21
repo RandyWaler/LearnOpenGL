@@ -16,6 +16,7 @@ public:
 
     // 构造器读取并构建着色器
     Shader(const GLchar* vertexPath, const GLchar* fragmentPath); //参数：需要读取的顶点着色器&片段元着色器
+    ~Shader();
     // 使用/激活程序
     void use();
     // uniform工具函数

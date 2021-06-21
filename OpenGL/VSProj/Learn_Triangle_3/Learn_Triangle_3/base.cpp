@@ -53,9 +53,11 @@ int main()
 
     const char* vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n"
+        //"out vec4 vertexColor; // 为片段着色器指定一个颜色输出\n"
         "void main()\n"
         "{\n"
         "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        //"vertexColor = vec4(0.5, 0.0, 0.0, 1.0); // 把输出变量设置为暗红色\n"
         "}\0";
 
 
@@ -85,9 +87,12 @@ int main()
 
     const char* fragmentShaderSource = "#version 330 core\n"
         "out vec4 FragColor;\n"
+        //"in vec4 vertexColor; // 从顶点着色器传来的输入变量（名称相同、类型相同）\n"
+        "uniform vec4 ourColor; // 在OpenGL程序代码中设定这个变量\n"
         "void main()\n"
         "{\n"
-        "FragColor = vec4(0.7f, 0.2f, 1.0f, 1.0f);\n"
+       // "FragColor = vec4(0.7f, 0.2f, 1.0f, 1.0f);\n"
+        "FragColor = ourColor;"
         "}\n";
 
     unsigned int fragmentShader;
@@ -334,7 +339,19 @@ int main()
         //渲染对象
         
         //渲染三角型
-        glUseProgram(shaderProgram); //指定渲染程序(材质)
+        float timeValue = glfwGetTime(); //获取游戏运行秒数
+        float greenValue = (sin(timeValue) / 2.0f) + 0.5f; //sin震荡
+        static int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor"); 
+        //查询uniform 属性 ourColor 的地址索引
+        //未找到返回-1
+
+        glUseProgram(shaderProgram); //注意！！！这里查询地址索引不需要 UseProgram 但设置必须在 UseProgram之后
+
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f); //设置ourColor 属性
+        //地址索引
+        //构造ourColor 的参数，因为ourColor是一个vec4，需要4个float参数
+        //glUniform4f 注意后面的 "4f" 需要4个float ， 也可以用 "fv" 一个向量
+
         glBindVertexArray(VAO);//绑定VAO
         glDrawArrays(GL_TRIANGLES, 0, 3);//渲染三角型
 
