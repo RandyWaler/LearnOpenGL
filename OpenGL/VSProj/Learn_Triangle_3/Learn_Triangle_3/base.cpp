@@ -375,6 +375,7 @@ int main()
         glUseProgram(shaderProgram_yellow);
         glBindVertexArray(VAO2);
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0); //三角带只需要4个顶点
+        //注意！！！！ 使用 EBO 需要用 glDrawElements 方法，而 VBO 绘制则是 glDrawArrays
 
         //第一个参数：图元类型
         //第二个参数：绘制6个顶点

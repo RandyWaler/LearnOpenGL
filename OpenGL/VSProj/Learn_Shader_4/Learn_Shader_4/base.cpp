@@ -4,6 +4,9 @@
 
 #include "Shader.h"
 
+#define STB_IMAGE_IMPLEMENTATION //只键.h中入被引用的代码部分
+#include "stb_image.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height); //响应windows 动态调整窗口大小的函数
 
 void processInput(GLFWwindow* window, int key, int scancode, int action, int mode);//输入回调事件
@@ -45,20 +48,91 @@ int main()
 
 
 
-    //Triangle
+    //渲染对象
 
-    Shader ourShader("baseVShader.vs", "baseFShader.fs");
+    //创建 shader
+
+    Shader ourShader("TexShader.vs", "TexShader.fs");
+    
+    //GL 创建纹理对象
+
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);//绑定为一个2D纹理
+
+
+    //设置纹理的环绕&滤波方式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //ST(XY) 设置为REPEAT 重复环绕模式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //放大&缩小，设置为线性滤波模式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    //通过 stb_image 加载纹理
+
+    //加载箱子
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        //第一参数，纹理目标 指定为 2D纹理 （之前绑定的1D/3D纹理不受影响），
+        //          从而本次设置将作用于之前绑定的2D纹理对象 texture，为其附加上纹理
+
+        //第二参数，MipMap生成级别
+        //第三参数，纹理存储格式  RGB 三位颜色
+        //第四五参数，宽高
+        //第六参数，总为0的历史遗留设置
+        //第七参数，数据源的格式
+        //第八参数，数据类型 GL_UNSIGNED_BYTE 储存为char(byte)数组
+        //第九参数，图像数据
+        glGenerateMipmap(GL_TEXTURE_2D);//MipMap 可以通过增加第二参数，或调用 glGenerateMipmap 生成
+    }
+    else std::cout << "Failed to load texture" << std::endl;
+
+    stbi_image_free(data);//生成了纹理，以及MipMap后，图像数据data可以被释放掉
+
+
+    //加载笑脸
+    unsigned int texture2;
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);//绑定为一个2D纹理
+
+
+    //设置纹理的环绕&滤波方式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //ST(XY) 设置为REPEAT 重复环绕模式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //放大&缩小，设置为线性滤波模式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    //通过 stb_image 加载纹理
+
+    //加载笑脸
+    stbi_set_flip_vertically_on_load(true);//翻转y轴，匹配GL纹理坐标
+    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        //第一参数，纹理目标 指定为 2D纹理 （之前绑定的1D/3D纹理不受影响），
+        //          从而本次设置将作用于之前绑定的2D纹理对象 texture，为其附加上纹理
+
+        //第二参数，MipMap生成级别
+        //第三参数，纹理存储格式  GL_RGBA .png 带透明通道
+        //第四五参数，宽高
+        //第六参数，总为0的历史遗留设置
+        //第七参数，数据源的格式
+        //第八参数，数据类型 GL_UNSIGNED_BYTE 储存为char(byte)数组
+        //第九参数，图像数据
+        glGenerateMipmap(GL_TEXTURE_2D);//MipMap 可以通过增加第二参数，或调用 glGenerateMipmap 生成
+    }
+    else std::cout << "Failed to load texture" << std::endl;
+
+    stbi_image_free(data);//生成了纹理，以及MipMap后，图像数据data可以被释放掉
 
 
 
-
-
-
-    //############################################################################################################
-    //创建顶点数组对象(Vertex Array Object, VAO) ， VAO会合成VBO的顶点数据，以及对于输入顶点属性的配置
-    //渲染对象时只需要绑定解绑VAO，并调用渲染即可，无需重复配置输入顶点属性
-
-    //创建一个VAO对象
+     //创建一个VAO对象
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);//创建一个对象缓冲 ，第一个参数 ID 是独一无二的，并且从1开始
     //注意这里和下面创建VBO时用到的glGenBuffers不同
@@ -66,29 +140,16 @@ int main()
     glBindVertexArray(VAO);//绑定VAO（之后设置的VBO数据和输入属性配置会被记录到这个VAO）
 
 
-
-    //定义一个顶点数据(Vertex Data),包含三个顶点(Vertex)
-    //每个顶点只有位置信息
-    //坐标位于 规范化设备坐标(NDC)下
-
-    // 模型空间 ---》 世界空间 ---》观察空间 ---》 齐次裁剪空间 ---》 NDC ---》 屏幕空间 
-
-    /*float vertices[] = {
-    -0.5f, -0.5f, 0.5f,
-     0.5f, -0.5f, 0.5f,
-     0.0f, 0.5f, 0.5f
-    };*/
-
     float vertices[] = {
-        // 位置              // 颜色
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
-        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
-         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
+        //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
+             0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上0
+             0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下1
+            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下2
+            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上3
     };
 
-
     unsigned int idxs[] = {
-        0,1,2
+        0,1,3,2
     };
 
     //创建一个顶点缓冲对象(Vertex Buffer Objects, VBO) 用于管理显存
@@ -107,22 +168,29 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idxs), idxs, GL_STATIC_DRAW);
 
     //配置顶点属性
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); //位置属性
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));//颜色属性
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));//UV属性
 
-    //每个顶点信息包括   vec3 Pos + vec3 colorRGB (6个float)
-    //对于pos  0号，3个 float，不需要标准化，步长 6个float，起始偏移0
-    //对于colorRGB  1号，3个 float，不需要标准化，步长 6个float，起始偏移 3个float长度
+    //每个顶点信息包括   vec3 Pos + vec3 colorRGB + vec2 UV (8个float)
+    //对于pos  0号，3个 float，不需要标准化，步长 8 个float，起始偏移0
+    //对于colorRGB  1号，3个 float，不需要标准化，步长 8 个float，起始偏移 3个float长度
+    //对于 UV 2号，2个 float，不需要标准化，步长 8 个float，起始偏移 6个float长度
 
 
     glEnableVertexAttribArray(0);//启用 0 号ID的顶点属性
-    glEnableVertexAttribArray(1);//启用 0 号ID的顶点属性
+    glEnableVertexAttribArray(1);//启用 1 号ID的顶点属性
+    glEnableVertexAttribArray(2);//启用 2 号ID的顶点属性
+
+
+
+    //渲染启动前
+
+    ourShader.use(); // 不要忘记在设置uniform变量之前激活着色器程序！
     
-
-
-
-
-    //渲染前
+    //设置纹理 uniform 属性 ，保证其与纹理单元的编号对应
+    ourShader.setInt("ourTexture", 0); //这里名称要与 .fs 着色器中声明 uniform 属性时一致
+    ourShader.setInt("ourTexture2", 1); 
 
 
 
@@ -138,23 +206,24 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT); //清空后置颜色缓冲区 --- 填充为glClearColor设置的清屏颜色
 
 
-        //渲染三角型
-        //float timeValue = glfwGetTime(); //获取游戏运行秒数
-        //float greenValue = (sin(timeValue) / 2.0f) + 0.5f; //sin震荡
-        //static int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        //查询uniform 属性 ourColor 的地址索引
-        //未找到返回-1
+        //渲染箱子
 
-        ourShader.use(); //注意！！！这里查询地址索引不需要 UseProgram 但设置必须在 UseProgram之后
+        
 
-        //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f); //设置ourColor 属性
-        //地址索引
-        //构造ourColor 的参数，因为ourColor是一个vec4，需要4个float参数
-        //glUniform4f 注意后面的 "4f" 需要4个float ， 也可以用 "fv" 一个向量
+        glActiveTexture(GL_TEXTURE0);// 在绑定纹理之前先激活纹理单元（0号纹理单元默认被激活）
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glActiveTexture(GL_TEXTURE1); //激活1号纹理单元并绑定纹理
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
+        ourShader.use();//启用shader
 
         glBindVertexArray(VAO);//绑定VAO
-        glDrawArrays(GL_TRIANGLES, 0, 3);//渲染三角型
+        glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0); 
+        //渲染三角带
 
+        //注意！！！！ 使用 EBO 需要用 glDrawElements 方法，而 VBO 绘制则是 glDrawArrays
+        
 
 
         glfwSwapBuffers(window); //双缓冲呈递

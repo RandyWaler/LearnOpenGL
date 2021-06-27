@@ -1,0 +1,190 @@
+#include <glad.h>
+#include <glfw3.h>
+#include <iostream>
+
+#include "Shader.h"
+
+#define STB_IMAGE_IMPLEMENTATION //只键.h中入被引用的代码部分
+#include "std_image.h" 
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height); //响应windows 动态调整窗口大小的函数
+
+void processInput(GLFWwindow* window, int key, int scancode, int action, int mode);//输入回调事件
+
+int main()
+{
+    //初始化
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //MAJOR-主版本设置为3
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //MINOR-次版本设置为3
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //使用 OPENGL Core-profile 核心模式
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //Mac OS X 系统
+
+    //创建窗口
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+
+    //初始化glad
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+
+    //设置视口大小
+    glViewport(0, 0, 800, 600);
+
+    //注册回调函数
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    glfwSetKeyCallback(window, processInput);
+
+
+
+    //Triangle
+
+    Shader ourShader("baseVShader.vs", "baseFShader.fs");
+
+
+
+
+
+
+    //############################################################################################################
+    //创建顶点数组对象(Vertex Array Object, VAO) ， VAO会合成VBO的顶点数据，以及对于输入顶点属性的配置
+    //渲染对象时只需要绑定解绑VAO，并调用渲染即可，无需重复配置输入顶点属性
+
+    //创建一个VAO对象
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);//创建一个对象缓冲 ，第一个参数 ID 是独一无二的，并且从1开始
+    //注意这里和下面创建VBO时用到的glGenBuffers不同
+
+    glBindVertexArray(VAO);//绑定VAO（之后设置的VBO数据和输入属性配置会被记录到这个VAO）
+
+
+
+    //定义一个顶点数据(Vertex Data),包含三个顶点(Vertex)
+    //每个顶点只有位置信息
+    //坐标位于 规范化设备坐标(NDC)下
+
+    // 模型空间 ---》 世界空间 ---》观察空间 ---》 齐次裁剪空间 ---》 NDC ---》 屏幕空间 
+
+    /*float vertices[] = {
+    -0.5f, -0.5f, 0.5f,
+     0.5f, -0.5f, 0.5f,
+     0.0f, 0.5f, 0.5f
+    };*/
+
+    float vertices[] = {
+        // 位置              // 颜色
+         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
+         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
+    };
+
+
+    unsigned int idxs[] = {
+        0,1,2
+    };
+
+    //创建一个顶点缓冲对象(Vertex Buffer Objects, VBO) 用于管理显存
+    unsigned int VBO;
+    glGenBuffers(1, &VBO); //创建一个对象缓冲 ，生成对象的数量，绑定到的 uint 对象ID
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);//绑定缓冲对象，录入数据
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idxs), idxs, GL_STATIC_DRAW);
+
+    //配置顶点属性
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+
+    //每个顶点信息包括   vec3 Pos + vec3 colorRGB (6个float)
+    //对于pos  0号，3个 float，不需要标准化，步长 6个float，起始偏移0
+    //对于colorRGB  1号，3个 float，不需要标准化，步长 6个float，起始偏移 3个float长度
+
+
+    glEnableVertexAttribArray(0);//启用 0 号ID的顶点属性
+    glEnableVertexAttribArray(1);//启用 0 号ID的顶点属性
+    
+
+
+
+
+    //渲染前
+
+
+
+    //启动渲染
+    while (!glfwWindowShouldClose(window)) //每次检查是否要求窗口退出
+    {
+        //processInput(window); //检测输入事件
+        glfwPollEvents(); //检查触发事件，调用响应函数  我们的framebuffer_size_callback会被调用
+
+        //渲染事件
+
+        glClearColor(0.2f, 0.2f, 0.3f, 1.0f); //设置清屏颜色
+        glClear(GL_COLOR_BUFFER_BIT); //清空后置颜色缓冲区 --- 填充为glClearColor设置的清屏颜色
+
+
+        //渲染三角型
+        //float timeValue = glfwGetTime(); //获取游戏运行秒数
+        //float greenValue = (sin(timeValue) / 2.0f) + 0.5f; //sin震荡
+        //static int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        //查询uniform 属性 ourColor 的地址索引
+        //未找到返回-1
+
+        ourShader.use(); //注意！！！这里查询地址索引不需要 UseProgram 但设置必须在 UseProgram之后
+
+        //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f); //设置ourColor 属性
+        //地址索引
+        //构造ourColor 的参数，因为ourColor是一个vec4，需要4个float参数
+        //glUniform4f 注意后面的 "4f" 需要4个float ， 也可以用 "fv" 一个向量
+
+        glBindVertexArray(VAO);//绑定VAO
+        glDrawArrays(GL_TRIANGLES, 0, 3);//渲染三角型
+
+
+
+        glfwSwapBuffers(window); //双缓冲呈递
+        
+    }
+
+    //
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+
+
+    glfwTerminate();//退出时释放资源
+
+    return 0;
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height); //重定义窗口大小
+}
+
+void processInput(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) //检测摁下 Esc
+        glfwSetWindowShouldClose(window, true); //关闭窗口
+}
+
+
+
