@@ -147,6 +147,18 @@
   <ItemGroup>
     <ClCompile Include="base.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="Shader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="awesomeface.png" />
+    <Image Include="container.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TexShader.fs" />
+    <None Include="TexShader.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Shader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
