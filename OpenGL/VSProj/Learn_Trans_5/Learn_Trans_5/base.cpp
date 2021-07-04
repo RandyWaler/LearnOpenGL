@@ -16,19 +16,12 @@
 #define STB_IMAGE_IMPLEMENTATION //只键.h中入被引用的代码部分
 #include "stb_image.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height); //响应windows 动态调整窗口大小的函数
 
-void processInput(GLFWwindow* window, int key, int scancode, int action, int mode);//输入回调事件
-
-inline void resetMat4(glm::mat4& r);//重置为单位矩阵
-
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
 
 
 
 //相机
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 
 glm::vec3 cameraRo = glm::vec3(0.0f, 0.0f, 0.0f); //Heading(Y) --- Pitch(X) --- Bank(Z) 轴旋转
 
@@ -40,12 +33,23 @@ glm::mat4 cmaRo = glm::mat4(1.0f);;//相机的旋转矩阵
 
 double cmaMoveSpeed = 5.0f;//相机每秒的移动速度
 
+double cmaRoSpeed = 360.0f;//相机每单位像素运动的旋转速度
+
 void cmaInit();//相机初始化
 
 void cmaUpdate();//生成相机的Transfomr矩阵 和 观察矩阵 
 
 
 //MainCon 引擎总控制
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height); //响应windows 动态调整窗口大小的函数
+
+void processInput(GLFWwindow* window, int key, int scancode, int action, int mode);//输入回调事件
+
+inline void resetMat4(glm::mat4& r);//重置为单位矩阵
+
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
 
 
 double lastTime;
@@ -56,9 +60,11 @@ void MainInit();
 
 void MainUpdate();//应用程序阶段最先运行，用于处理每帧的一些通用参数甚设置
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 
-// -- MainCon
+
+// -- MainCon Key
 
 bool flag_W = false;
 bool flag_S = false;
@@ -67,7 +73,15 @@ bool flag_D = false;
 bool flag_Q = false;
 bool flag_E = false;
 
+// -- MainCon Mouse
 
+float lastX = SCR_WIDTH/2, lastY = SCR_HEIGHT/2;
+float nmX = lastX;
+float nmY = lastY;
+
+
+int mouseHDir = 0;
+int mouseVDir = 0;
 
 
 int main()
@@ -105,8 +119,9 @@ int main()
 
     glfwSetKeyCallback(window, processInput);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);//捕捉鼠标（鼠标不显示）
 
-
+    glfwSetCursorPosCallback(window, mouse_callback);//注册回调函数
     
 
     //渲染对象
@@ -343,8 +358,8 @@ int main()
 
 
     //开启背面剔除
-    //glCullFace(GL_BACK); //设置剔除面（默认是背面）
-    //glEnable(GL_CULL_FACE); //激活剔除
+    glCullFace(GL_BACK); //设置剔除面（默认是背面）
+    glEnable(GL_CULL_FACE); //激活剔除
 
     //GL_BACK 剔除背面
     //GL_FRONT 剔除正面
@@ -362,10 +377,10 @@ int main()
     //启动渲染
     while (!glfwWindowShouldClose(window)) //每次检查是否要求窗口退出
     {
-
+        glfwPollEvents(); //检查触发事件，调用响应函数  我们的framebuffer_size_callback会被调用
         MainUpdate();
         //processInput(window); //检测输入事件
-        glfwPollEvents(); //检查触发事件，调用响应函数  我们的framebuffer_size_callback会被调用
+        
 
         //动画物理等等等
 
@@ -554,17 +569,49 @@ void cmaUpdate()
 {
     //相机运动
     if (flag_W)//向前移动
-        cameraPos -= glm::vec3(cmaTrans[2][0] * cmaMoveSpeed * dt, cmaTrans[2][1] * cmaMoveSpeed * dt, cmaTrans[2][2] * cmaMoveSpeed * dt);
-    else if (flag_S)//向后移动
         cameraPos += glm::vec3(cmaTrans[2][0] * cmaMoveSpeed * dt, cmaTrans[2][1] * cmaMoveSpeed * dt, cmaTrans[2][2] * cmaMoveSpeed * dt);
+    else if (flag_S)//向后移动
+        cameraPos -= glm::vec3(cmaTrans[2][0] * cmaMoveSpeed * dt, cmaTrans[2][1] * cmaMoveSpeed * dt, cmaTrans[2][2] * cmaMoveSpeed * dt);
     if (flag_A)//向左移动
-        cameraPos -= glm::vec3(cmaTrans[0][0] * cmaMoveSpeed * dt, cmaTrans[0][1] * cmaMoveSpeed * dt, cmaTrans[0][2] * cmaMoveSpeed * dt);
-    else if (flag_D)//向右移动
         cameraPos += glm::vec3(cmaTrans[0][0] * cmaMoveSpeed * dt, cmaTrans[0][1] * cmaMoveSpeed * dt, cmaTrans[0][2] * cmaMoveSpeed * dt);
+    else if (flag_D)//向右移动
+        cameraPos -= glm::vec3(cmaTrans[0][0] * cmaMoveSpeed * dt, cmaTrans[0][1] * cmaMoveSpeed * dt, cmaTrans[0][2] * cmaMoveSpeed * dt);
     if (flag_Q)//向上移动
         cameraPos.y += cmaMoveSpeed * dt;
     else if (flag_E)//向下移动
         cameraPos.y -= cmaMoveSpeed * dt;
+
+    //相机旋转
+
+    if (nmY > lastY) mouseVDir = -1;//向下移动了
+    else if (nmY < lastY) mouseVDir = 1;//向上移动了
+    else mouseVDir = 0;
+    
+    
+
+    if (nmX > lastX) mouseHDir = 1;//向右移动了
+    else if (nmX < lastX) mouseHDir = -1;
+    else mouseHDir = 0;
+
+    lastY = nmY;
+    lastX = nmX;
+
+
+    //上下旋转Pitch
+
+    cameraRo.x += mouseVDir * dt * cmaRoSpeed;
+
+    //cameraRo.x = glm::sin(glfwGetTime()) * 30.0f;
+
+    //std::cout << glm::sin(glfwGetTime()) << std::endl;
+
+    //左右旋转Heading
+
+    cameraRo.y -= mouseHDir * dt * cmaRoSpeed;
+
+
+    if (cameraRo.x > 85.0f) cameraRo.x = 85.0f;
+    else if (cameraRo.x < -85.0f) cameraRo.x = -85.0f;
 
 
     //生成当前的相机Transfrom矩阵
@@ -573,19 +620,109 @@ void cmaUpdate()
     cmaTrans = glm::translate(cmaTrans, cameraPos); //T移动
 
 
+    //resetMat4(cmaRo);
+
+    //glm::mat4 heading = glm::mat4(1.0f);
+    //heading = glm::rotate(heading, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    //glm::mat4 pitch = glm::mat4(1.0f);
+    //pitch = glm::rotate(pitch, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
+
+
+
+    //cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.z), glm::vec3(pitch[0][0], pitch[0][1], pitch[0][2]));//Bank
+    //cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
+    //cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+
+
     resetMat4(cmaRo);
 
-    glm::mat4 heading = glm::mat4(1.0f);
-    heading = glm::rotate(heading, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+
+    /*std::cout << "\n---------------------" << std::endl;
+
+    std::cout << cameraRo.y << std::endl;
+
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            std::cout << cmaRo[i][j] << "\t";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "---------------------\n" << std::endl;*/
+
+
+   /* std::cout << "\n---------------------" << std::endl;
+
+    std::cout << cameraRo.y << std::endl;
+
+    std::cout << std::endl;
+
+    std::cout << cmaRo[0][0] << std::endl;
+    std::cout << cmaRo[1][0] << std::endl;
+    std::cout << cmaRo[2][0] << std::endl;
+
+    std::cout << glm::cos(glm::radians(cameraRo.y)) << std::endl;
+    std::cout << 0 << std::endl;
+    std::cout << -glm::sin(glm::radians(cameraRo.y)) << std::endl;
+
+    std::cout << "---------------------\n" << std::endl;*/
+
 
     glm::mat4 pitch = glm::mat4(1.0f);
-    pitch = glm::rotate(pitch, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
+
+    pitch = glm::rotate(pitch, glm::radians(cameraRo.x), glm::vec3(cmaRo[0][0], cmaRo[0][1], cmaRo[0][2])); //Pitch
+
+    cmaRo = pitch * cmaRo;
+
+    /*glm::mat4 bank = glm::mat4(1.0f);
+
+    bank = glm::rotate(bank, glm::radians(cameraRo.z), glm::vec3(cmaRo[0][2], cmaRo[1][2], cmaRo[2][2]));
+
+    cmaRo = bank * cmaRo;*/
 
 
+    //std::cout << glm::dot(glm::vec3(cmaRo[0][0], cmaRo[1][0], cmaRo[2][0]), glm::vec3(cmaRo[0][1], cmaRo[1][1], cmaRo[2][1])) << std::endl;
+    //std::cout << glm::dot(glm::vec3(cmaRo[0][0], cmaRo[1][0], cmaRo[2][0]), glm::vec3(cmaRo[0][2], cmaRo[1][2], cmaRo[2][2])) << std::endl;
+    //std::cout << glm::dot(glm::vec3(cmaRo[0][1], cmaRo[1][1], cmaRo[2][1]), glm::vec3(cmaRo[0][2], cmaRo[1][2], cmaRo[2][2])) << std::endl;
 
-    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.z), glm::vec3(pitch[0][0], pitch[0][1], pitch[0][2]));//Bank
-    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
-    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+    
+    
+    
+    
+    // 《3D游戏数学》 大部分博主原来的想法  --- 必错！！！
+
+    //resetMat4(cmaRo);
+
+    //cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+
+
+    //glm::mat4 pitch = glm::mat4(1.0f);
+
+    //pitch = glm::rotate(pitch, glm::radians(cameraRo.x), glm::vec3(1.0f, 0.0f, 0.0f)); //Pitch
+
+    //cmaRo *= pitch; //* cmaRo;
+
+    //glm::mat4 bank = glm::mat4(1.0f);
+
+    //bank = glm::rotate(bank, glm::radians(cameraRo.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+
+    //cmaRo *= bank; //* cmaRo;
+
+
+    //ERROE
+
+    //resetMat4(cmaRo);
+
+    //cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+    //cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.x), glm::vec3(1.0f, 0.0f, 0.0f));//Pitch
+    //cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.z), glm::vec3(0.0f, 0.0f, 1.0f));//Bank
+    
+    
+
+
 
     cmaTrans *= cmaRo;
 
@@ -596,7 +733,17 @@ void cmaUpdate()
 
     view = glm::transpose(cmaRo);
 
-    view = glm::translate(view, -cameraPos); //T移动
+    view = glm::translate(view, cameraPos); //T移动
+
+    
+
+    
+
+
+
+
+
+    
 
 }
 
@@ -613,6 +760,19 @@ void MainUpdate()
     
 
 
+
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    //注意这里Y是反向的，从顶-->底 增大
+
+    nmX = xpos;
+    nmY = ypos;
+
+    
+
+   // std::cout << mouseVDir << std::endl;
 
 }
 
