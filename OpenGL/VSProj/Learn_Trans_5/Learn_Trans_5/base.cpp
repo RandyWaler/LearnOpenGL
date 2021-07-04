@@ -25,6 +25,51 @@ inline void resetMat4(glm::mat4& r);//重置为单位矩阵
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+
+
+//相机
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
+
+glm::vec3 cameraRo = glm::vec3(0.0f, 0.0f, 0.0f); //Heading(Y) --- Pitch(X) --- Bank(Z) 轴旋转
+
+glm::mat4 view = glm::mat4(1.0f);//观察矩阵（相机Trans矩阵的逆矩阵）
+
+glm::mat4 cmaTrans = glm::mat4(1.0f);;//相机的Transfom矩阵
+
+glm::mat4 cmaRo = glm::mat4(1.0f);;//相机的旋转矩阵
+
+double cmaMoveSpeed = 5.0f;//相机每秒的移动速度
+
+void cmaInit();//相机初始化
+
+void cmaUpdate();//生成相机的Transfomr矩阵 和 观察矩阵 
+
+
+//MainCon 引擎总控制
+
+
+double lastTime;
+
+double dt;//时间差值
+
+void MainInit();
+
+void MainUpdate();//应用程序阶段最先运行，用于处理每帧的一些通用参数甚设置
+
+
+
+// -- MainCon
+
+bool flag_W = false;
+bool flag_S = false;
+bool flag_A = false;
+bool flag_D = false;
+bool flag_Q = false;
+bool flag_E = false;
+
+
+
+
 int main()
 {
     //初始化
@@ -61,6 +106,8 @@ int main()
     glfwSetKeyCallback(window, processInput);
 
 
+
+    
 
     //渲染对象
 
@@ -249,7 +296,7 @@ int main()
     unsigned int perspectiveLoc = glGetUniformLocation(ourShader.ID, "perspective"); //查找Uniform属性地址
 
     glm::mat4 trans_ro;//旋转矩阵
-    glm::mat4 view = glm::mat4(1.0f);
+    
     glm::mat4 perspective = glm::mat4(1.0f); //!!!!!!!!! 必须先用单位矩阵初始化
 
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f)); //必选先初始化为单位矩阵(无位移无旋转无缩放) 
@@ -305,16 +352,28 @@ int main()
 
 
     glm::mat4 trans;
+
+
+    MainInit();
+    cmaInit();
     
 
 
     //启动渲染
     while (!glfwWindowShouldClose(window)) //每次检查是否要求窗口退出
     {
+
+        MainUpdate();
         //processInput(window); //检测输入事件
         glfwPollEvents(); //检查触发事件，调用响应函数  我们的framebuffer_size_callback会被调用
 
-        //渲染事件
+        //动画物理等等等
+
+
+        cmaUpdate();
+
+
+        //渲染事件（渲染开始前，这一帧要渲染的全部内容已经全部确定）
 
         glClearColor(0.2f, 0.2f, 0.3f, 1.0f); //设置清屏颜色
         //glClear(GL_COLOR_BUFFER_BIT); //清空后置颜色缓冲区 --- 填充为glClearColor设置的清屏颜色
@@ -333,7 +392,7 @@ int main()
 
        
         ourShader.use();//查询不需要在use之后，但设置属性必须在use之后
-
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));//设置相机的观察矩阵
 
 
         //为了动态变换就必须动态计算 Trasnform 动态设置Uniform属性
@@ -429,10 +488,39 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height); //重定义窗口大小
 }
 
+
+
+
 void processInput(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) //检测摁下 Esc
         glfwSetWindowShouldClose(window, true); //关闭窗口
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) flag_W = true;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE) flag_W = false;
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) flag_S = true;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE) flag_S = false;
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) flag_A = true;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE) flag_A = false;
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) flag_D = true;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE) flag_D = false;
+
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) flag_Q = true;
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE) flag_Q = false;
+
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) flag_E = true;
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) flag_E = false;
+
+   /* if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        std::cout << "PRESS" << std::endl;
+    else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_REPEAT)
+        std::cout << "REPEAT" << std::endl;
+    else std::cout << "NOTHING" << std::endl;*/
+
 }
 
 inline void resetMat4(glm::mat4& r)
@@ -441,6 +529,91 @@ inline void resetMat4(glm::mat4& r)
     r[1][0] = 0.0f; r[1][1] = 1.0f; r[1][2] = 0.0f; r[1][3] = 0.0f;
     r[2][0] = 0.0f; r[2][1] = 0.0f; r[2][2] = 1.0f; r[2][3] = 0.0f;
     r[3][0] = 0.0f; r[3][1] = 0.0f; r[3][2] = 0.0f; r[3][3] = 1.0f;
+}
+
+void cmaInit() //生成相机的Transfom矩阵
+{
+    cmaTrans = glm::translate(cmaTrans, cameraPos); //T移动
+
+    glm::mat4 heading = glm::mat4(1.0f);
+    heading = glm::rotate(heading, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    glm::mat4 pitch = glm::mat4(1.0f);
+    pitch = glm::rotate(pitch, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
+
+
+
+    cmaTrans = glm::rotate(cmaTrans, glm::radians(cameraRo.z), glm::vec3(pitch[0][0], pitch[0][1], pitch[0][2]));//Bank
+    cmaTrans = glm::rotate(cmaTrans, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
+    cmaTrans = glm::rotate(cmaTrans, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+
+
+}
+
+void cmaUpdate()
+{
+    //相机运动
+    if (flag_W)//向前移动
+        cameraPos -= glm::vec3(cmaTrans[2][0] * cmaMoveSpeed * dt, cmaTrans[2][1] * cmaMoveSpeed * dt, cmaTrans[2][2] * cmaMoveSpeed * dt);
+    else if (flag_S)//向后移动
+        cameraPos += glm::vec3(cmaTrans[2][0] * cmaMoveSpeed * dt, cmaTrans[2][1] * cmaMoveSpeed * dt, cmaTrans[2][2] * cmaMoveSpeed * dt);
+    if (flag_A)//向左移动
+        cameraPos -= glm::vec3(cmaTrans[0][0] * cmaMoveSpeed * dt, cmaTrans[0][1] * cmaMoveSpeed * dt, cmaTrans[0][2] * cmaMoveSpeed * dt);
+    else if (flag_D)//向右移动
+        cameraPos += glm::vec3(cmaTrans[0][0] * cmaMoveSpeed * dt, cmaTrans[0][1] * cmaMoveSpeed * dt, cmaTrans[0][2] * cmaMoveSpeed * dt);
+    if (flag_Q)//向上移动
+        cameraPos.y += cmaMoveSpeed * dt;
+    else if (flag_E)//向下移动
+        cameraPos.y -= cmaMoveSpeed * dt;
+
+
+    //生成当前的相机Transfrom矩阵
+
+    resetMat4(cmaTrans);
+    cmaTrans = glm::translate(cmaTrans, cameraPos); //T移动
+
+
+    resetMat4(cmaRo);
+
+    glm::mat4 heading = glm::mat4(1.0f);
+    heading = glm::rotate(heading, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    glm::mat4 pitch = glm::mat4(1.0f);
+    pitch = glm::rotate(pitch, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
+
+
+
+    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.z), glm::vec3(pitch[0][0], pitch[0][1], pitch[0][2]));//Bank
+    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
+    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+
+    cmaTrans *= cmaRo;
+
+
+
+    //生成View观察矩阵
+    resetMat4(view);
+
+    view = glm::transpose(cmaRo);
+
+    view = glm::translate(view, -cameraPos); //T移动
+
+}
+
+void MainInit()
+{
+    lastTime = glfwGetTime();
+}
+
+void MainUpdate()
+{
+    dt = glfwGetTime() - lastTime; //计算时差
+    lastTime = glfwGetTime();
+
+    
+
+
+
 }
 
 
