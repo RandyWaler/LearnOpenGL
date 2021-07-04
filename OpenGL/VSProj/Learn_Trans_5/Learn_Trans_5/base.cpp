@@ -33,7 +33,7 @@ glm::mat4 cmaRo = glm::mat4(1.0f);;//相机的旋转矩阵
 
 double cmaMoveSpeed = 5.0f;//相机每秒的移动速度
 
-double cmaRoSpeed = 360.0f;//相机每单位像素运动的旋转速度
+double cmaRoSpeed = 480.0f;//相机每单位像素运动的旋转速度
 
 void cmaInit();//相机初始化
 
@@ -565,6 +565,11 @@ void cmaInit() //生成相机的Transfom矩阵
 
 }
 
+glm::mat4 pitch = glm::mat4(1.0f);
+float dtro;
+
+float maxdt = 10.0f;
+
 void cmaUpdate()
 {
     //相机运动
@@ -599,7 +604,12 @@ void cmaUpdate()
 
     //上下旋转Pitch
 
-    cameraRo.x += mouseVDir * dt * cmaRoSpeed;
+    
+    dtro = mouseVDir * dt * cmaRoSpeed;
+    glm::clamp(dtro, -maxdt, maxdt);
+    cameraRo.x += dtro;
+
+    //cameraRo.x += 45.0f*dt;
 
     //cameraRo.x = glm::sin(glfwGetTime()) * 30.0f;
 
@@ -607,7 +617,9 @@ void cmaUpdate()
 
     //左右旋转Heading
 
-    cameraRo.y -= mouseHDir * dt * cmaRoSpeed;
+    dtro = mouseHDir * dt * cmaRoSpeed;
+    glm::clamp(dtro, -maxdt, maxdt);
+    cameraRo.y -= dtro;
 
 
     if (cameraRo.x > 85.0f) cameraRo.x = 85.0f;
@@ -637,40 +649,24 @@ void cmaUpdate()
 
     resetMat4(cmaRo);
 
-    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+    ////Heading
+    cmaRo = glm::rotate(cmaRo, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    /*std::cout << "\n---------------------" << std::endl;
+    //std::cout << "\n---------------------" << std::endl;
 
-    std::cout << cameraRo.y << std::endl;
+    //std::cout << cameraRo.y << std::endl;
 
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            std::cout << cmaRo[i][j] << "\t";
-        }
-        std::cout << std::endl;
-    }
+    //for (int ia = 0; ia < 4; ++ia) {
+    //    for (int ja = 0; ja < 4; ++ja) {
+    //        std::cout << cmaRo[ia][ja] << "\t";
+    //    }
+    //    std::cout << std::endl;
+    //}
 
-    std::cout << "---------------------\n" << std::endl;*/
-
-
-   /* std::cout << "\n---------------------" << std::endl;
-
-    std::cout << cameraRo.y << std::endl;
-
-    std::cout << std::endl;
-
-    std::cout << cmaRo[0][0] << std::endl;
-    std::cout << cmaRo[1][0] << std::endl;
-    std::cout << cmaRo[2][0] << std::endl;
-
-    std::cout << glm::cos(glm::radians(cameraRo.y)) << std::endl;
-    std::cout << 0 << std::endl;
-    std::cout << -glm::sin(glm::radians(cameraRo.y)) << std::endl;
-
-    std::cout << "---------------------\n" << std::endl;*/
+    //std::cout << "---------------------\n" << std::endl;
 
 
-    glm::mat4 pitch = glm::mat4(1.0f);
+    resetMat4(pitch);
 
     pitch = glm::rotate(pitch, glm::radians(cameraRo.x), glm::vec3(cmaRo[0][0], cmaRo[0][1], cmaRo[0][2])); //Pitch
 
@@ -735,15 +731,6 @@ void cmaUpdate()
 
     view = glm::translate(view, cameraPos); //T移动
 
-    
-
-    
-
-
-
-
-
-    
 
 }
 
@@ -757,7 +744,7 @@ void MainUpdate()
     dt = glfwGetTime() - lastTime; //计算时差
     lastTime = glfwGetTime();
 
-    
+    //std::cout << dt << std::endl;
 
 
 
