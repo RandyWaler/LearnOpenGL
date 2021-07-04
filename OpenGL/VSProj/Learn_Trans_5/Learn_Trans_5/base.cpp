@@ -20,6 +20,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height); //ÏìÓ
 
 void processInput(GLFWwindow* window, int key, int scancode, int action, int mode);//ÊäÈë»Øµ÷ÊÂ¼ş
 
+inline void resetMat4(glm::mat4& r);//ÖØÖÃÎªµ¥Î»¾ØÕó
+
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
 int main()
 {
     //³õÊ¼»¯
@@ -48,7 +53,7 @@ int main()
     }
 
     //ÉèÖÃÊÓ¿Ú´óĞ¡
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
     //×¢²á»Øµ÷º¯Êı
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -149,16 +154,61 @@ int main()
     glBindVertexArray(VAO);//°ó¶¨VAO£¨Ö®ºóÉèÖÃµÄVBOÊı¾İºÍÊäÈëÊôĞÔÅäÖÃ»á±»¼ÇÂ¼µ½Õâ¸öVAO£©
 
 
+
+    //·½¿é
+    //float vertices[] = {
+    //    //     ---- Î»ÖÃ ----       ---- ÑÕÉ« ----     - ÎÆÀí×ø±ê -
+    //         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // ÓÒÉÏ0
+    //         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // ÓÒÏÂ1
+    //        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // ×óÏÂ2
+    //        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // ×óÉÏ3
+    //};
+
+    //unsigned int idxs[] = {
+    //    0,1,3,2
+    //};
+
+
+    /*
+    
+          7--------4
+         /|       /|
+        / |      / |
+       /  |     /  |
+      3---|----0   |
+      |  6     |   5
+      | /      |  / 
+      |/       | /  
+      2________1/
+    */
+
+
+    //Á¢·½Ìå
     float vertices[] = {
         //     ---- Î»ÖÃ ----       ---- ÑÕÉ« ----     - ÎÆÀí×ø±ê -
-             0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // ÓÒÉÏ0
-             0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // ÓÒÏÂ1
-            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // ×óÏÂ2
-            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // ×óÉÏ3
+             0.5f,  0.5f, 0.5f,   0.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // Ç°ÓÒÉÏ0
+             0.5f, -0.5f, 0.5f,   0.0f, 0.0f, 0.0f,   1.0f, 0.0f,   // Ç°ÓÒÏÂ1
+            -0.5f, -0.5f, 0.5f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f,   // Ç°×óÏÂ2
+            -0.5f,  0.5f, 0.5f,   0.0f, 0.0f, 0.0f,   0.0f, 1.0f,   // Ç°×óÉÏ3
+             0.5f,  0.5f,  -0.5f,   0.0f, 0.0f, 0.0f,  1.0f, 0.0f,    // ºóÓÒÉÏ4
+             0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 0.0f,   1.0f, 1.0f,    // ºóÓÒÏÂ5
+            -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 0.0f,   0.0f, 1.0f,    // ºó×óÏÂ6
+            -0.5f,  0.5f, -0.5f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f,     // ºó×óÉÏ7
+
+            0.5f,  0.5f,  -0.5f,   0.0f, 0.0f, 0.0f,  0.0f, 1.0f,    // ºóÓÒÉÏ8(4) ÎªÊ¹µÃÓÒÃæÌùÍ¼ÕıÈ·
+            0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f,    // ºóÓÒÏÂ9(5) 
+            -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 0.0f,   1.0f, 0.0f,    // ºó×óÏÂ10(6) ÎªÊ¹µÃ×óÃæÌùÍ¼ÕıÈ·
+            -0.5f,  0.5f, -0.5f,   0.0f, 0.0f, 0.0f,   1.0f, 1.0f,    // ºó×óÉÏ11(7)
+
     };
 
     unsigned int idxs[] = {
-        0,1,3,2
+        0,3,1,1,3,2, //ÕıÃæ
+        4,7,0,0,7,3, //¶¥Ãæ
+        3,11,2,2,11,10, //×óÃæ
+        7,4,6,6,4,5, //±³Ãæ
+        8,0,9,9,0,1, //ÓÒÃæ
+        1,2,5,5,2,6  //µ×Ãæ
     };
 
     //´´½¨Ò»¸ö¶¥µã»º³å¶ÔÏó(Vertex Buffer Objects, VBO) ÓÃÓÚ¹ÜÀíÏÔ´æ
@@ -194,11 +244,40 @@ int main()
 
     
     
+    unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform"); //²éÕÒUniformÊôĞÔµØÖ·
+    unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view"); //²éÕÒUniformÊôĞÔµØÖ·
+    unsigned int perspectiveLoc = glGetUniformLocation(ourShader.ID, "perspective"); //²éÕÒUniformÊôĞÔµØÖ·
+
+    glm::mat4 trans_ro;//Ğı×ª¾ØÕó
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 perspective = glm::mat4(1.0f); //!!!!!!!!! ±ØĞëÏÈÓÃµ¥Î»¾ØÕó³õÊ¼»¯
+
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f)); //±ØÑ¡ÏÈ³õÊ¼»¯Îªµ¥Î»¾ØÕó(ÎŞÎ»ÒÆÎŞĞı×ªÎŞËõ·Å) 
+    perspective = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 
-    
+    glm::vec3 cubePositions[] = { //¸ü¶àµÄÏä×Ó
+  glm::vec3(0.0f,  0.0f,  0.0f),
+  glm::vec3(2.0f,  5.0f, -15.0f),
+  glm::vec3(-1.5f, -2.2f, -2.5f),
+  glm::vec3(-3.8f, -2.0f, -12.3f),
+  glm::vec3(2.4f, -0.4f, -3.5f),
+  glm::vec3(-1.7f,  3.0f, -7.5f),
+  glm::vec3(1.3f, -2.0f, -2.5f),
+  glm::vec3(1.5f,  2.0f, -2.5f),
+  glm::vec3(1.5f,  0.2f, -1.5f),
+  glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
 
-    //µØÖ·£¬1¸ö¾ØÕó£¬²»ĞèÒª×ªÖÃ(T)´¦Àí(Õë¶ÔÏ°¹ßĞĞÏòÁ¿ÓÒ³ËµÄ¿ª·¢Õß),½«ÎÒÃÇµÄ±ä»»¾ØÕó×ª»»µ½ GL ½ÓÊÜµÄĞÎÊ½
+    /*glm::mat4 dw = glm::mat4(1.0f);
+
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            std::cout << dw[i][j] << "\t";
+        }
+        std::cout << std::endl;
+    }*/
+
 
 
     //äÖÈ¾Æô¶¯Ç°
@@ -209,6 +288,23 @@ int main()
     ourShader.setInt("ourTexture", 0); //ÕâÀïÃû³ÆÒªÓë .fs ×ÅÉ«Æ÷ÖĞÉùÃ÷ uniform ÊôĞÔÊ±Ò»ÖÂ
     ourShader.setInt("ourTexture2", 1); 
 
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);//ÉèÖÃUniformÊôĞÔ
+
+    glUniformMatrix4fv(perspectiveLoc, 1, GL_FALSE, glm::value_ptr(perspective));//ÉèÖÃUniformÊôĞÔ
+
+    glEnable(GL_DEPTH_TEST);//ÆôÓÃÉî¶È²âÊÔ
+
+
+    //¿ªÆô±³ÃæÌŞ³ı
+    //glCullFace(GL_BACK); //ÉèÖÃÌŞ³ıÃæ£¨Ä¬ÈÏÊÇ±³Ãæ£©
+    //glEnable(GL_CULL_FACE); //¼¤»îÌŞ³ı
+
+    //GL_BACK ÌŞ³ı±³Ãæ
+    //GL_FRONT ÌŞ³ıÕıÃæ
+    //GL_FRONT_AND_BACK ÕıÃæ±³Ãæ¶¼ÌŞ³ı
+
+
+    glm::mat4 trans;
     
 
 
@@ -221,8 +317,9 @@ int main()
         //äÖÈ¾ÊÂ¼ş
 
         glClearColor(0.2f, 0.2f, 0.3f, 1.0f); //ÉèÖÃÇåÆÁÑÕÉ«
-        glClear(GL_COLOR_BUFFER_BIT); //Çå¿ÕºóÖÃÑÕÉ«»º³åÇø --- Ìî³äÎªglClearColorÉèÖÃµÄÇåÆÁÑÕÉ«
+        //glClear(GL_COLOR_BUFFER_BIT); //Çå¿ÕºóÖÃÑÕÉ«»º³åÇø --- Ìî³äÎªglClearColorÉèÖÃµÄÇåÆÁÑÕÉ«
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);//Ã¿Ö¡Çå¿ÕÑÕÉ«»º³å ²¢ÖØÖÃÉî¶È»º³å £¨|Óë²Ù×÷×éºÏmask£©
 
         //äÖÈ¾Ïä×Ó
 
@@ -243,13 +340,24 @@ int main()
 
         //±ä»»########################################################################################
 
-        glm::mat4 trans = glm::mat4(1.0f); //±ØÑ¡ÏÈ³õÊ¼»¯Îªµ¥Î»¾ØÕó(ÎŞÎ»ÒÆÎŞĞı×ªÎŞËõ·Å)
+        //resetMat4(trans_ro);
 
-        trans = glm::translate(trans, glm::vec3(0.5f, 0.0f, 0.0f));//ÔÙ½«×ø±ê×ª»Ø (0,0) ÎªÖĞĞÄµÄ×ø±êÏµÏÂ
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f)); //ĞÂ×ø±êÏµÏÂÈÆÔ­µãĞı×ª(ÈÆ(0.5,0)Ğı×ª)
-        trans = glm::translate(trans, glm::vec3(-0.5f, 0.0f, 0.0f));// ×ªÈëÒÔ (0.5,0) ÎªÔ­µãµÄĞÂ×ø±êÏµ
-        trans = glm::rotate(trans, (float)glfwGetTime()*3, glm::vec3(0.0f, 0.0f, 1.0f)); //×ÔĞı(ÒÔÔ­µã/×ÔÉíÖáĞÄÎªÖĞĞÄ)Ğı×ª
-        trans = glm::scale(trans, glm::vec3(0.3, 0.3, 0.3)); //Ô­Î»£¨ÒÔÔ­µã/×ÔÉíÖáĞÄÎªÖĞĞÄ£©Ëõ·Å
+        //trans_ro = glm::rotate(trans_ro, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));; //±ØÑ¡ÏÈ³õÊ¼»¯Îªµ¥Î»¾ØÕó(ÎŞÎ»ÒÆÎŞĞı×ªÎŞËõ·Å)
+        
+
+        //Ğı×ª·½¿é
+        //trans = glm::translate(trans, glm::vec3(0.5f, 0.0f, 0.0f));//ÔÙ½«×ø±ê×ª»Ø (0,0) ÎªÖĞĞÄµÄ×ø±êÏµÏÂ
+        //trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f)); //ĞÂ×ø±êÏµÏÂÈÆÔ­µãĞı×ª(ÈÆ(0.5,0)Ğı×ª)
+        //trans = glm::translate(trans, glm::vec3(-0.5f, 0.0f, 0.0f));// ×ªÈëÒÔ (0.5,0) ÎªÔ­µãµÄĞÂ×ø±êÏµ
+        //trans = glm::rotate(trans, (float)glfwGetTime()*3, glm::vec3(0.0f, 0.0f, 1.0f)); //×ÔĞı(ÒÔÔ­µã/×ÔÉíÖáĞÄÎªÖĞĞÄ)Ğı×ª
+        //trans = glm::scale(trans, glm::vec3(0.3, 0.3, 0.3)); //Ô­Î»£¨ÒÔÔ­µã/×ÔÉíÖáĞÄÎªÖĞĞÄ£©Ëõ·Å
+
+        //Ğı×ªÏä×Ó(Á¢·½Ìå)
+
+        //trans_ro = glm::rotate(trans_ro, (float)glfwGetTime()/4.0f, glm::vec3(0.0f, 0.0f, 1.0f));//Bank
+        //trans_ro = glm::rotate(trans_ro, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));//Pitch
+        //trans_ro = glm::rotate(trans_ro, (float)glfwGetTime()/2.0f, glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+
 
         //ÕâÀïµÄ¸³Öµ GLM»á×Ô¶¯½«¾ØÕóÏà³Ë£¨Ô­¾ØÕó×ó³ËĞÂ¾ØÕó£©£¬·µ»ØµÄ½á¹ûÊÇÒ»¸ö°üÀ¨ÁË¶à¸ö±ä»»µÄ±ä»»¾ØÕó
 
@@ -258,15 +366,44 @@ int main()
         //´Ó¶ø trans = ABC
         // trans x vec = ABC x vec   £¨Ë³ĞòC->B->A£©
 
-        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform"); //²éÕÒUniformÊôĞÔµØÖ·
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));//ÉèÖÃUniformÊôĞÔ
+        
+        
+        //µØÖ·£¬1¸ö¾ØÕó£¬²»ĞèÒª×ªÖÃ(T)´¦Àí(Õë¶ÔÏ°¹ßĞĞÏòÁ¿ÓÒ³ËµÄ¿ª·¢Õß),½«ÎÒÃÇµÄ±ä»»¾ØÕó×ª»»µ½ GL ½ÓÊÜµÄĞÎÊ½
+        
+        
 
        
         //½øĞĞÏä×ÓµÄäÖÈ¾
 
         glBindVertexArray(VAO);//°ó¶¨VAO
-        glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0); 
+        //glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0); 
         //äÖÈ¾Èı½Ç´ø
+
+        for (int i = 0; i < 10;++i) {
+
+            resetMat4(trans_ro);
+            trans_ro = glm::rotate(trans_ro, (float)glfwGetTime()*2/(i+1.0f), glm::vec3(0.0f, 0.0f, 1.0f));//Bank
+            trans_ro = glm::rotate(trans_ro, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));//Pitch
+            trans_ro = glm::rotate(trans_ro, (float)glfwGetTime()/(i+1.0f), glm::vec3(0.0f, 1.0f, 0.0f));//Heading
+
+            resetMat4(trans);
+            trans = glm::translate(trans, cubePositions[i]);
+            //trans = trans_ro; //ÕâÀï¾ØÕóÓë¾ØÕó×éºÏÓ¦¸ÃÓÃÏà³Ë£¬¶ø²»ÊÇ¸³Öµ
+
+            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans*trans_ro));//ÉèÖÃUniformÊôĞÔ
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+            //äÖÈ¾µ¥¸öÈı½ÇĞÍ
+            //GL_TRIANGLES µ¥¸öÈı½ÇĞÍ(ÄæÊ±Õë¾íÈÆÎªÕıÃæ)
+
+            //GL_TRIANGLE_STRIP Èı½Ç´ø Ò»ÄæÒ»Ë³ÎªÕıÃæµÄÄ£Ê½
+
+            //GL_TRIANGLE_FAN Èı½ÇÉÈ£¬Ã¿Á½µãÓëÊ¼ĞÄµãÄæÊ±Õë¾íÈëÎªÕı
+        }
+
+
+        
+
+        
 
         //×¢Òâ£¡£¡£¡£¡ Ê¹ÓÃ EBO ĞèÒªÓÃ glDrawElements ·½·¨£¬¶ø VBO »æÖÆÔòÊÇ glDrawArrays
         
@@ -296,6 +433,14 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) //¼ì²âŞôÏÂ Esc
         glfwSetWindowShouldClose(window, true); //¹Ø±Õ´°¿Ú
+}
+
+inline void resetMat4(glm::mat4& r)
+{
+    r[0][0] = 1.0f; r[0][1] = 0.0f; r[0][2] = 0.0f; r[0][3] = 0.0f;
+    r[1][0] = 0.0f; r[1][1] = 1.0f; r[1][2] = 0.0f; r[1][3] = 0.0f;
+    r[2][0] = 0.0f; r[2][1] = 0.0f; r[2][2] = 1.0f; r[2][3] = 0.0f;
+    r[3][0] = 0.0f; r[3][1] = 0.0f; r[3][2] = 0.0f; r[3][3] = 1.0f;
 }
 
 
