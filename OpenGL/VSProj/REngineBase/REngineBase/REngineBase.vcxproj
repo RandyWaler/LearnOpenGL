@@ -147,11 +147,17 @@
   <ItemGroup>
     <ClCompile Include="base.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="InputEvnet.cpp" />
+    <ClCompile Include="MouseEvnet.cpp" />
+    <ClCompile Include="RENode.cpp" />
     <ClCompile Include="RE_Main.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="TestGame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="InputEvnet.h" />
+    <ClInclude Include="MouseEvnet.h" />
+    <ClInclude Include="RENode.h" />
     <ClInclude Include="RE_Main.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="TestGame.h" />

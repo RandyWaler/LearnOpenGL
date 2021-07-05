@@ -5,20 +5,26 @@
 #include <glfw3.h>
 #include <iostream>
 
+//数学库
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
+//
+#include "RENode.h"
+#include "InputEvnet.h"
+#include "MouseEvnet.h"
+
 using std::string;
 class GLFWwindow;
 
 namespace RE {
 
-	
-
-
-    //按键输入
+    //按键输入(声明在这里是为了混一个namespace)
 	extern void processInput(GLFWwindow* window, int key, int scancode, int action, int mode);//输入回调事件
 
-
-	
-
+	extern void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 
 	class RE_Main
@@ -73,7 +79,26 @@ namespace RE {
 		//清屏颜色
 		float clearColor[4] = { 0.2f, 0.2f, 0.3f, 1.0f };
 
+
+		//游戏物体
+
+		std::unordered_set<RENode*> nodes;
+
+		std::unordered_set<InputEvnet*> ipt;//输入事件接口
+
+		std::unordered_set<MouseEvnet*> mos;//输入事件接口
+
+		//待实现：#####################################
+
+		//在游戏中动态删除物体
+
+
+
+
 		//静态调用##########################################################
+		
+		static RE_Main* getInstance();
+
 
 		/// <summary>
 		/// <para>控制台打印输出 </para> 
@@ -81,6 +106,9 @@ namespace RE {
 		/// <param name="s">输出信息</param>
 		/// <param name="gl">(giveline)是否需要加首尾引启</param>
 		static void logMessage(string s,bool gl = false); 
+
+
+		static void resetMat4(glm::mat4 & r);//重置为单位矩阵
 
 
 		//开始运行 入口点  不应被重写
@@ -102,8 +130,6 @@ namespace RE {
 		void refreshDt();
 
 		
-
-
 		/// <summary>
 		/// 结束游戏运行
 		/// </summary>

@@ -30,6 +30,15 @@
     <ClCompile Include="TestGame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="RENode.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="InputEvnet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MouseEvnet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -39,6 +48,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TestGame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RENode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="InputEvnet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseEvnet.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

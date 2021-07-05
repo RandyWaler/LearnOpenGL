@@ -82,6 +82,10 @@ void RE::RE_Main::gameLogic()
     glfwPollEvents(); //检查触发输入事件，调用响应函数 
     refreshDt();//刷新时差
 
+
+    for (auto n : nodes) n->onGameLogic();//调用所有节点的 gameLogic 逻辑
+
+
 }
 
 
@@ -90,6 +94,8 @@ void RE::RE_Main::gameLogic()
 //准备渲染相关的变量
 void RE::RE_Main::beforeRender()
 {
+    for (auto n : nodes) n->onBeforeRender();//调用所有节点的 onBeforeRender 逻辑
+
 
 }
 
@@ -101,19 +107,34 @@ void RE::RE_Main::render()
     glClearColor(clearColor[0],clearColor[1],clearColor[2],clearColor[3]); //设置清屏颜色（状态设置）
     glClear(GL_COLOR_BUFFER_BIT); //清空后置颜色缓冲区 --- 填充为glClearColor设置的清屏颜色
 
+
+    for (auto n : nodes) n->onRender();//调用所有节点的 onRender 逻辑
+
     //渲染注册的对象
 
     glfwSwapBuffers(window); //双缓冲呈递
 }
 
-void RE::RE_Main::relese()
+void RE::RE_Main::relese() 
 {
-    glfwTerminate();//退出时释放资源
+
+    //释放所有注册的节点
+
+    for (auto n : nodes) {
+        delete n;
+    }
+
     delete _instance;
+
+    glfwTerminate();//退出时释放资源
+    
 
 }
 
-
+RE_Main* RE::RE_Main::getInstance()
+{
+    return _instance;
+}
 
 void RE::RE_Main::logMessage(std::string s,bool gl)
 {
@@ -124,6 +145,13 @@ void RE::RE_Main::logMessage(std::string s,bool gl)
 
 }
 
+void RE::RE_Main::resetMat4(glm::mat4 & r)
+{
+    r[0][0] = 1.0f; r[0][1] = 0.0f; r[0][2] = 0.0f; r[0][3] = 0.0f;
+    r[1][0] = 0.0f; r[1][1] = 1.0f; r[1][2] = 0.0f; r[1][3] = 0.0f;
+    r[2][0] = 0.0f; r[2][1] = 0.0f; r[2][2] = 1.0f; r[2][3] = 0.0f;
+    r[3][0] = 0.0f; r[3][1] = 0.0f; r[3][2] = 0.0f; r[3][3] = 1.0f;
+}
 void RE_Main::run()
 {
 
@@ -163,6 +191,15 @@ void RE::RE_Main::_GameOver()
 //键盘输入事件
 void RE::processInput(GLFWwindow* window, int key, int scancode, int action, int mode) 
 {
+    for (auto i : RE_Main::getInstance()->ipt) { //调用所有注册的键盘输入事件
+        i->onInput(window); 
+    }
 
+}
 
+void RE::mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    for (auto i : RE_Main::getInstance()->mos) {
+        i->onMouse(window, xpos, ypos);
+    }
 }

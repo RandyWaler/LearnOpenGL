@@ -733,6 +733,8 @@ void cmaUpdate()
 
     view = glm::translate(view, cameraPos); //TÒÆ¶¯
 
+    //view = view*glm::translate(glm::mat4(1.0f), cameraPos);
+
 
 }
 

@@ -21,8 +21,11 @@ bool TestGame::reInit()
     if (!RE_Main::reInit()) return false;
 
 
+
+    RENode* nod = new RENode();
+
    
-    logMessage("TestGame Init Succeed");
+    //logMessage("TestGame Init Succeed");
     return true;
 }
 
@@ -34,7 +37,7 @@ void TestGame::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //清空后置颜色缓冲区 --- 填充为glClearColor设置的清屏颜色
 
 
-    RE_Main::logMessage("on TestGame render");
+    for (auto n : nodes) n->onRender();
 
     //渲染注册的对象
 
