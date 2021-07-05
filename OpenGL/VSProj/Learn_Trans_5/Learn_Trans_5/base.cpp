@@ -48,8 +48,8 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 
 inline void resetMat4(glm::mat4& r);//重置为单位矩阵
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+unsigned int SCR_WIDTH = 800;
+unsigned int SCR_HEIGHT = 600;
 
 
 double lastTime;
@@ -500,6 +500,8 @@ int main()
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+    SCR_WIDTH = width;
+    SCR_HEIGHT = height;
     glViewport(0, 0, width, height); //重定义窗口大小
 }
 
