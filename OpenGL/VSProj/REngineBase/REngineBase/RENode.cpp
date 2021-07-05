@@ -33,6 +33,12 @@ void RE::RENode::setlocalPosition(glm::vec3 p)
 	change = true;
 }
 
+void RE::RENode::setlocalPosition(float x, float y, float z)
+{
+	pos = glm::vec3(x, y, z);
+	change = true;
+}
+
 void RE::RENode::setlocalRotation(glm::mat4 ro)
 {
 	rotation = ro;
@@ -42,6 +48,12 @@ void RE::RENode::setlocalRotation(glm::mat4 ro)
 void RE::RENode::setlocalScale(glm::vec3 sc)
 {
 	scal = sc;
+	change = true;
+}
+
+void RE::RENode::setlocalScale(float x, float y, float z)
+{
+	scal = glm::vec3(x, y, z);
 	change = true;
 }
 

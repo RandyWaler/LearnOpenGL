@@ -52,8 +52,7 @@ bool RE_Main::reInit()
 
     //Our BaseInit
 
-    dt = 0.0f;
-    _LastTime = glfwGetTime();
+
 
     //¿ªÆô±³ÃæÌÞ³ý
 
@@ -76,12 +75,12 @@ bool RE_Main::reUpdate()
         _GameOver();
         return false;
     }
-
+    
     gameLogic();
-    _LastTime = glfwGetTime();
     beforeRender();
+    _LastTime = glfwGetTime();
     render();
-
+    
     return true;
 
 }
@@ -175,7 +174,8 @@ void RE_Main::run()
 		logMessage("Error!!! REngine Init Fail\nProgram exited",true);
         _GameOver();
 	}
-
+    dt = 0.0f;
+    _LastTime = glfwGetTime();
 	while (reUpdate());
 
 	relese();

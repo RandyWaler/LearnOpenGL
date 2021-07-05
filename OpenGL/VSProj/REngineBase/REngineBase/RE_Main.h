@@ -74,7 +74,7 @@ namespace RE {
 		unsigned int SCR_HEIGHT = 600;
 
 		//时差相关
-		double dt;//距离上一次游戏逻辑运行结束经过的时间差
+		double dt;//距离上一帧运行结束经过的时间差
 
 
 		/// <summary>

@@ -10,21 +10,15 @@
 
 //REngine
 
-#include"REObj.h"
+#include "REObj.h"
+#include "RECamera.h"
 
 
 using namespace std;
 using namespace RE;
 
-//软重写
-bool TestGame::reInit()
-{
-    if (!RE_Main::reInit()) return false;
 
-
-
-   
-    glm::vec3 cubePositions[] = { //很多的箱子 它们的位置不同
+glm::vec3 cubePositions[] = { //很多的箱子 它们的位置不同
 glm::vec3(0.0f,  0.0f,  0.0f),
 glm::vec3(2.0f,  5.0f, -15.0f),
 glm::vec3(-1.5f, -2.2f, -2.5f),
@@ -35,8 +29,25 @@ glm::vec3(1.3f, -2.0f, -2.5f),
 glm::vec3(1.5f,  2.0f, -2.5f),
 glm::vec3(1.5f,  0.2f, -1.5f),
 glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
+};
 
+
+//软重写
+bool TestGame::reInit()
+{
+    if (!RE_Main::reInit()) return false;
+
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);//捕捉鼠标（鼠标不显示）
+
+    //启用欧拉角漫游摄像机
+    REFreeCamera::getMainCamera()->setlocalPosition(0.0f, 0.0f, -3.0f);
+    REFreeCamera::getMainCamera()->cmaInit();
+
+    //注意相机初始化要在所有物体前面，保证view Pers 矩阵设置正确
+
+
+    //创建箱子们
     int n = sizeof(cubePositions) / sizeof(glm::vec3);
 
     REObj* obj;
@@ -52,6 +63,9 @@ glm::vec3(-1.3f,  1.0f, -1.5f)
         obj->add2DTexture("ourTexture", "container.jpg");
         obj->add2DTexture("ourTexture2", "awesomeface.png", GL_RGBA, true);
     }
+
+
+    
    
     //logMessage("TestGame Init Succeed");
     return flInit;

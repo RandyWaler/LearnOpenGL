@@ -48,8 +48,12 @@ namespace RE {
 		//set 设置相关
 
 		void setlocalPosition(glm::vec3 p);
+		void setlocalPosition(float x,float y,float z);
+
 		void setlocalRotation(glm::mat4 ro);
+		
 		void setlocalScale(glm::vec3 sc);
+		void setlocalScale(float x, float y, float z);
 
 		//get 相关
 
