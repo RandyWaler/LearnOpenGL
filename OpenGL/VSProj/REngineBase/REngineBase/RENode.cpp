@@ -101,12 +101,15 @@ void RE::RENode::setTransform(glm::mat4 ptrans, bool cp)
 		trans = glm::scale(trans, scal);//向前面叠加scale
 	}
 
-	if(cp||change) //父节点或者自己有修改都要更新世界矩阵
-	    world = trans * ptrans;//更新世界矩阵
+	if (cp || change) { //父节点或者自己有修改都要更新世界矩阵
+		//world = trans * ptrans;//更新世界矩阵
+		world = ptrans*trans;//更新世界矩阵
+		//std::cout << "refresh World" << std::endl;
+	}
 
 	for (auto c : childs) c->setTransform(world, cp || change);//启用子物体的更新
 	
-	
+	change = cp || change;
 }
 
 void RE::RENode::addChild(RENode* c)
@@ -149,4 +152,5 @@ void RE::RENode::onRender(){} //nothing
 void RE::RENode::onFrameOver()
 {
 	change = false;
+	//std::cout << "onFrameOver" << std::endl;
 }

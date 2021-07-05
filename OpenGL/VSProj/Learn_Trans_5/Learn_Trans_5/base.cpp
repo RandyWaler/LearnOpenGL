@@ -21,7 +21,7 @@
 
 
 //相机
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
 
 glm::vec3 cameraRo = glm::vec3(0.0f, 0.0f, 0.0f); //Heading(Y) --- Pitch(X) --- Bank(Z) 轴旋转
 
@@ -280,6 +280,8 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    std::cout << sizeof(vertices) << std::endl;
+
 
     unsigned int EBO;
     glGenBuffers(1, &EBO);
@@ -287,6 +289,8 @@ int main()
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);//绑定缓冲对象，录入数据
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idxs), idxs, GL_STATIC_DRAW);
+
+    std::cout << sizeof(idxs) << std::endl;
 
     //配置顶点属性
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); //位置属性
@@ -314,21 +318,21 @@ int main()
     
     glm::mat4 perspective = glm::mat4(1.0f); //!!!!!!!!! 必须先用单位矩阵初始化
 
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f)); //必选先初始化为单位矩阵(无位移无旋转无缩放) 
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); //必选先初始化为单位矩阵(无位移无旋转无缩放) 
     perspective = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 
     glm::vec3 cubePositions[] = { //更多的箱子
   glm::vec3(0.0f,  0.0f,  0.0f),
-  glm::vec3(2.0f,  5.0f, -15.0f),
-  glm::vec3(-1.5f, -2.2f, -2.5f),
-  glm::vec3(-3.8f, -2.0f, -12.3f),
-  glm::vec3(2.4f, -0.4f, -3.5f),
-  glm::vec3(-1.7f,  3.0f, -7.5f),
-  glm::vec3(1.3f, -2.0f, -2.5f),
-  glm::vec3(1.5f,  2.0f, -2.5f),
-  glm::vec3(1.5f,  0.2f, -1.5f),
-  glm::vec3(-1.3f,  1.0f, -1.5f)
+  //glm::vec3(2.0f,  5.0f, -15.0f),
+  //glm::vec3(-1.5f, -2.2f, -2.5f),
+  //glm::vec3(-3.8f, -2.0f, -12.3f),
+  //glm::vec3(2.4f, -0.4f, -3.5f),
+  //glm::vec3(-1.7f,  3.0f, -7.5f),
+  //glm::vec3(1.3f, -2.0f, -2.5f),
+  //glm::vec3(1.5f,  2.0f, -2.5f),
+  //glm::vec3(1.5f,  0.2f, -1.5f),
+  //glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
     /*glm::mat4 dw = glm::mat4(1.0f);
@@ -453,7 +457,7 @@ int main()
         //glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0); 
         //渲染三角带
 
-        for (int i = 0; i < 10;++i) {
+        for (int i = 0; i < sizeof(cubePositions)/4;++i) {
 
             resetMat4(trans_ro);
             trans_ro = glm::rotate(trans_ro, (float)glfwGetTime()*2/(i+1.0f), glm::vec3(0.0f, 0.0f, 1.0f));//Bank
@@ -473,6 +477,8 @@ int main()
 
             //GL_TRIANGLE_FAN 三角扇，每两点与始心点逆时针卷入为正
         }
+
+       
 
 
         
@@ -555,9 +561,10 @@ void cmaInit() //生成相机的Transfom矩阵
     glm::mat4 heading = glm::mat4(1.0f);
     heading = glm::rotate(heading, glm::radians(cameraRo.y), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    glm::mat4 pitch = glm::mat4(1.0f);
+    glm::mat4 pitch = glm::mat4(1.0f); //这里glm是行向量左乘阵，因此Heading转后空间X轴是第一行不是第一列
     pitch = glm::rotate(pitch, glm::radians(cameraRo.x), glm::vec3(heading[0][0], heading[0][1], heading[0][2]));//Pitch
 
+    //Bank旋转暂时忽略
 
 
     cmaTrans = glm::rotate(cmaTrans, glm::radians(cameraRo.z), glm::vec3(pitch[0][0], pitch[0][1], pitch[0][2]));//Bank

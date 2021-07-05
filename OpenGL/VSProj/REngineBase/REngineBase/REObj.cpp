@@ -153,7 +153,9 @@ void RE::REObj::onRender()
 
     //ÉèÖÃ¾ØÕó
     
-    if (change) ourShader->setMat4(vsTransName, world);
+    if (change) {
+        ourShader->setMat4(vsTransName, world);// std::cout << "set world" << std::endl;
+    }
     if(mrdViewChange) ourShader->setMat4(vsViewName,mrdView);
     if (mrdPersChange) ourShader->setMat4(vsPersName, mrdPerspective);
 

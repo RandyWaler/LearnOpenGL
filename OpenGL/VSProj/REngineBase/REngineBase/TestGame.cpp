@@ -64,7 +64,28 @@ bool TestGame::reInit()
         obj->add2DTexture("ourTexture2", "awesomeface.png", GL_RGBA, true);
     }
 
+    //创建两个带父子关系的箱子
+    Abox = new REObj(glm::vec3(0.0f,0.0f,-12.0f)); //将位置填入构造函数即可
 
+    Abox->creatShader("TexShader.vs", "TexShader.fs");
+
+    REObj::creatBox(Abox);
+
+    Abox->add2DTexture("ourTexture", "container.jpg");
+    Abox->add2DTexture("ourTexture2", "awesomeface.png", GL_RGBA, true);
+
+
+
+    Bbox = new REObj(glm::vec3(0.0f, 0.0f, -3.0f)); //将位置填入构造函数即可
+
+    Bbox->creatShader("TexShader.vs", "TexShader.fs");
+
+    REObj::creatBox(Bbox);
+
+    Bbox->add2DTexture("ourTexture", "container.jpg");
+    Bbox->add2DTexture("ourTexture2", "awesomeface.png", GL_RGBA, true);
+
+    Abox->addChild(Bbox);
     
    
     //logMessage("TestGame Init Succeed");
@@ -92,6 +113,27 @@ RE_Main* TestGame::getInstance()
     if (!_instance) _instance = new TestGame();
 
     return _instance;
+}
+
+
+glm::mat4 abxRo = glm::mat4(1.0f);
+
+void TestGame::gameLogic()
+{
+    RE_Main::gameLogic();
+
+    //RE_Main::logMessage("onGameLogic");
+    refreshDt();
+    RE_Main::resetMat4(abxRo);
+    abxRo = glm::rotate(abxRo, (float)glfwGetTime() * 3, glm::vec3(0.0f, 1.0f, 0.0f)); //自旋(以原点/自身轴心为中心)旋转
+
+    //cout << (float)glm::radians(dt * 72000.0f) << endl;
+
+    Abox->setlocalRotation(abxRo);
+
+
+
+
 }
 
 

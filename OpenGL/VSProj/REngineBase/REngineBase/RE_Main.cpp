@@ -80,7 +80,7 @@ bool RE_Main::reUpdate()
     beforeRender();
     _LastTime = glfwGetTime();
     render();
-    
+    frameOver();
     return true;
 
 }
@@ -128,6 +128,9 @@ void RE::RE_Main::render()
 void RE::RE_Main::frameOver()
 {
     for (auto n : nodes) n->onFrameOver();//调用所有节点的 onFrameOver 逻辑
+
+
+    //logMessage("\n------------------\n");
 }
 
 void RE::RE_Main::relese()

@@ -20,8 +20,15 @@ public:
 
     //重写
 
+    virtual void gameLogic() override; //允许被重写
+
+
     //MyGame
 
     std::vector<RE::REObj*> boxs;
+
+
+    RE::REObj* Abox;
+    RE::REObj* Bbox;
 };
 
