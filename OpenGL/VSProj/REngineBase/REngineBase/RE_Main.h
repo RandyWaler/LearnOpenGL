@@ -32,6 +32,7 @@ namespace RE {
 	protected:
 		//单例 请在子类中完成 _getInstance 为其赋子类对象
 		static RE_Main* _instance;
+		RE_Main();
 
 		//三大运行
 		virtual bool reInit();//初始化
@@ -50,20 +51,27 @@ namespace RE {
 		//进行渲染
 		virtual void render();//允许被重写
 
+
+		//帧末 收尾工作 flag 置回
+		virtual void frameOver();//允许被重写
+
 		virtual void relese();//释放资源
 
 		//常量
+		bool flInit = true;//初始化是否成功
+		bool onGame = true;//游戏是否需要继续运行下去
 
-		static bool onGame;//游戏是否需要继续运行下去
-
-		unsigned int SCR_WIDTH = 800;
-		unsigned int SCR_HEIGHT = 600;
+		
 
 		//变量
 
 		GLFWwindow* window = nullptr;
 
 	public:
+
+		//屏幕分辨率（不做 set get 过渡封装）
+		unsigned int SCR_WIDTH = 800;
+		unsigned int SCR_HEIGHT = 600;
 
 		//时差相关
 		double dt;//距离上一次游戏逻辑运行结束经过的时间差
@@ -134,6 +142,13 @@ namespace RE {
 		/// 结束游戏运行
 		/// </summary>
 		void _GameOver();
+
+
+		void _InitFail();//出现某些错误，初始化失败，游戏无法运行
+
+		bool isInitFail();
+
+
         
 
 	};

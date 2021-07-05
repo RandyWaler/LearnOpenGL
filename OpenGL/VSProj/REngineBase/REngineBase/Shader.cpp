@@ -1,6 +1,8 @@
 #include "Shader.h"
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+#include"RE_Main.h"
+
+Shader::Shader(const std::string vertexPath, const std::string fragmentPath)
 {
     // 1. 从文件路径中获取顶点/片段着色器
     std::string vertexCode;
@@ -29,6 +31,10 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     catch (std::ifstream::failure e)
     {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+
+        RE::RE_Main::getInstance()->_InitFail();
+        return;
+
     }
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
@@ -44,12 +50,14 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glCompileShader(vertex);
     // 打印编译错误（如果有的话）
     glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
+    if (!success) {
+
         glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-        std::cout << "\n---------------------------------------------" << std::endl;
-        std::cout << "【ERROR】 VERTEX_SHADER_COMPILATION_FAILED\n" << infoLog << std::endl;
-        std::cout << "\n---------------------------------------------" << std::endl;
+
+        RE::RE_Main::logMessage("【ERROR】 VERTEX_SHADER_COMPILATION_FAILED\n" + std::string(infoLog), true);
+        RE::RE_Main::getInstance()->_InitFail();
+
+        return;
     };
 
     // 片段着色器
@@ -61,10 +69,13 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
 
     if (!success) {
+
         glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-        std::cout << "\n---------------------------------------------" << std::endl;
-        std::cout << "【ERROR】 FRAGMENT_SHADER_COMPILATION_FAILED\n" << infoLog << std::endl;
-        std::cout << "\n---------------------------------------------" << std::endl;
+
+        RE::RE_Main::logMessage("【ERROR】 FRAGMENT_SHADER_COMPILATION_FAILED\n" + std::string(infoLog), true);
+        RE::RE_Main::getInstance()->_InitFail();
+
+        return;
 
     }
 
@@ -113,4 +124,9 @@ void Shader::setInt(const std::string& name, int value) const
 void Shader::setFloat(const std::string& name, float value) const
 {
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+}
+
+void Shader::setMat4(const std::string& name, glm::mat4 value) const
+{
+    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()),1,GL_FALSE, glm::value_ptr(value));
 }

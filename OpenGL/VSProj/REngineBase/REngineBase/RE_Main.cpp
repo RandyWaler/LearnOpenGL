@@ -4,10 +4,14 @@ using namespace std;
 using namespace RE;
 
 //static初始化
-bool RE_Main::onGame = true;
+//bool RE_Main::onGame = true;
 RE_Main* RE_Main::_instance = nullptr;
 
 
+
+RE::RE_Main::RE_Main()
+{
+}
 
 bool RE_Main::reInit()
 {
@@ -42,7 +46,7 @@ bool RE_Main::reInit()
 
     //注册回调函数
     glfwSetKeyCallback(window, processInput);
-
+    glfwSetCursorPosCallback(window, mouse_callback);//注册回调函数
 
 
 
@@ -50,6 +54,13 @@ bool RE_Main::reInit()
 
     dt = 0.0f;
     _LastTime = glfwGetTime();
+
+    //开启背面剔除
+
+    glEnable(GL_DEPTH_TEST);//启用深度测试
+
+    glCullFace(GL_BACK); //设置剔除面（默认是背面）
+    glEnable(GL_CULL_FACE); //激活剔除
 
     return true;
 
@@ -115,7 +126,12 @@ void RE::RE_Main::render()
     glfwSwapBuffers(window); //双缓冲呈递
 }
 
-void RE::RE_Main::relese() 
+void RE::RE_Main::frameOver()
+{
+    for (auto n : nodes) n->onFrameOver();//调用所有节点的 onFrameOver 逻辑
+}
+
+void RE::RE_Main::relese()
 {
 
     //释放所有注册的节点
@@ -156,7 +172,7 @@ void RE_Main::run()
 {
 
 	if (!reInit()) { //初始化失败
-		logMessage("Error!!! REngine Init Fail\n Program exited");
+		logMessage("Error!!! REngine Init Fail\nProgram exited",true);
         _GameOver();
 	}
 
@@ -168,7 +184,7 @@ void RE_Main::run()
 void RE::RE_Main::setScreenWH(int w, int h)
 {
     if (w <= 0 || h <= 0) {
-        logMessage("Error!!! setScreenWH get bad param");
+        logMessage("Error!!! setScreenWH get bad param",true);
         return;
     }
 
@@ -185,6 +201,16 @@ void RE::RE_Main::_GameOver()
 {
     onGame = false;
     logMessage("GameOver");
+}
+
+void RE::RE_Main::_InitFail()
+{
+    flInit = false;
+}
+
+bool RE::RE_Main::isInitFail()
+{
+    return flInit;
 }
 
 

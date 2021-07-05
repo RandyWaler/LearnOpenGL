@@ -85,9 +85,10 @@ namespace RE {
 
 		//对接 RE_Main 调用
 
-		virtual void onGameLogic();
-		virtual void onBeforeRender();
-		virtual void onRender();
+		virtual void onGameLogic(); //空函数 建议子类硬重写
+		virtual void onBeforeRender();//包含 resetTransfrom逻辑
+		virtual void onRender();//空函数 建议子类硬重写
+		virtual void onFrameOver();//包含 Change重置false逻辑
 
 
 	};

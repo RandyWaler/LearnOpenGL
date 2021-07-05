@@ -8,9 +8,10 @@
 //Shader文件加载
 #include "Shader.h"
 
-//图片加载
-#define STB_IMAGE_IMPLEMENTATION //只键.h中入被引用的代码部分
-#include "stb_image.h"
+//REngine
+
+#include"REObj.h"
+
 
 using namespace std;
 using namespace RE;
@@ -22,11 +23,38 @@ bool TestGame::reInit()
 
 
 
-    RENode* nod = new RENode();
+   
+    glm::vec3 cubePositions[] = { //很多的箱子 它们的位置不同
+glm::vec3(0.0f,  0.0f,  0.0f),
+glm::vec3(2.0f,  5.0f, -15.0f),
+glm::vec3(-1.5f, -2.2f, -2.5f),
+glm::vec3(-3.8f, -2.0f, -12.3f),
+glm::vec3(2.4f, -0.4f, -3.5f),
+glm::vec3(-1.7f,  3.0f, -7.5f),
+glm::vec3(1.3f, -2.0f, -2.5f),
+glm::vec3(1.5f,  2.0f, -2.5f),
+glm::vec3(1.5f,  0.2f, -1.5f),
+glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
 
+    int n = sizeof(cubePositions) / sizeof(glm::vec3);
+
+    REObj* obj;
+
+    for (int i = 0; i < n; ++i) { //创建多个箱子
+
+        REObj* obj = new REObj(cubePositions[i]); //将位置填入构造函数即可
+
+        obj->creatShader("TexShader.vs", "TexShader.fs");
+
+        REObj::creatBox(obj);
+
+        obj->add2DTexture("ourTexture", "container.jpg");
+        obj->add2DTexture("ourTexture2", "awesomeface.png", GL_RGBA, true);
+    }
    
     //logMessage("TestGame Init Succeed");
-    return true;
+    return flInit;
 }
 
 //硬重写，不调用父render
@@ -46,11 +74,9 @@ void TestGame::render()
 
 RE_Main* TestGame::getInstance()
 {
-    if (!onGame) {
-        logMessage("Error!!! The game is over");
-        return nullptr;
-    }
+    
     if (!_instance) _instance = new TestGame();
+
     return _instance;
 }
 

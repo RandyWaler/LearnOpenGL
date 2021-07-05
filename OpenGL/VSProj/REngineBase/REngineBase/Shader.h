@@ -8,6 +8,11 @@
 #include <sstream>
 #include <iostream>
 
+//数学库
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 class Shader
 {
 public:
@@ -15,7 +20,7 @@ public:
     unsigned int ID; //shaderProgrm ID
 
     // 构造器读取并构建着色器
-    Shader(const GLchar* vertexPath, const GLchar* fragmentPath); //参数：需要读取的顶点着色器&片段元着色器
+    Shader(const std::string vertexPath, const std::string fragmentPath); //参数：需要读取的顶点着色器&片段元着色器
     ~Shader();
     // 使用/激活程序
     void use();
@@ -23,7 +28,7 @@ public:
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;
-
+    void setMat4(const std::string& name, glm::mat4 value) const;
 
 };
 

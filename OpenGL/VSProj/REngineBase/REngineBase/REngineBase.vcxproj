@@ -149,15 +149,21 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputEvnet.cpp" />
     <ClCompile Include="MouseEvnet.cpp" />
+    <ClCompile Include="RECamera.cpp" />
     <ClCompile Include="RENode.cpp" />
+    <ClCompile Include="REObj.cpp" />
     <ClCompile Include="RE_Main.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="TestGame.cpp" />
+    <ClCompile Include="image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InputEvnet.h" />
     <ClInclude Include="MouseEvnet.h" />
+    <ClInclude Include="RECamera.h" />
     <ClInclude Include="RENode.h" />
+    <ClInclude Include="REObj.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RE_Main.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="TestGame.h" />
@@ -169,6 +175,9 @@
   <ItemGroup>
     <None Include="TexShader.fs" />
     <None Include="TexShader.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="REngineBase.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

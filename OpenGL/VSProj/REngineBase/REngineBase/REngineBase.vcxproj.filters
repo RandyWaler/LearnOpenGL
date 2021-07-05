@@ -39,6 +39,15 @@
     <ClCompile Include="MouseEvnet.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="REObj.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RECamera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -59,6 +68,15 @@
     <ClInclude Include="MouseEvnet.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="REObj.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RECamera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="awesomeface.png">
@@ -75,5 +93,10 @@
     <None Include="TexShader.vs">
       <Filter>资源文件</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="REngineBase.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

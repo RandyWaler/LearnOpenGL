@@ -11,6 +11,14 @@ RE::RENode::RENode(glm::vec3 p, glm::mat4 ro, glm::vec3 sc) : pos{ p }, rotation
 
 	RE_Main::getInstance()->nodes.insert(this);
 
+	RE_Main::resetMat4(trans);
+
+	trans = translate(trans, pos);
+	trans = trans * rotation; //先变换在右侧，先旋转后移动
+	trans = glm::scale(trans, scal);//向前面叠加scale
+
+	world = trans;//更新世界矩阵
+
 }
 
 RE::RENode::~RENode()
@@ -86,7 +94,7 @@ void RE::RENode::setTransform(glm::mat4 ptrans, bool cp)
 
 	for (auto c : childs) c->setTransform(world, cp || change);//启用子物体的更新
 	
-	change = false;
+	
 }
 
 void RE::RENode::addChild(RENode* c)
@@ -125,3 +133,8 @@ void RE::RENode::onBeforeRender()
 }
 
 void RE::RENode::onRender(){} //nothing
+
+void RE::RENode::onFrameOver()
+{
+	change = false;
+}

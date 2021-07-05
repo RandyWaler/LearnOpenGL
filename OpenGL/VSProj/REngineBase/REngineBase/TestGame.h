@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RE_Main.h"
+#include "REObj.h"
 
 //Base
 #include <glad.h>
@@ -16,5 +17,11 @@ protected:
 public:
     //¾²Ì¬µ÷ÓÃ##########################################################
     static RE_Main* getInstance();
+
+    //ÖØÐ´
+
+    //MyGame
+
+    std::vector<RE::REObj*> boxs;
 };
 
